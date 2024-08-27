@@ -12,60 +12,40 @@ f = sys.stdin
 
 
 n, m = map(int, f.readline().split())
+graph_map = [ list(map(int, f.readline().split())) for _ in range(n) ]
 
 dy = [1, -1, 0, 0]
 dx = [0, 0, 1, -1]
 
-string_list = []
-for _ in range(n):
-    string_list.append(str(f.readline().strip()))
-map_string = "/".join(string_list)
-
-
-def bfs(y, x, map):
+def bfs(graph_map):
     dq = deque()
-    dq.append((y, x))
+
+    for j in range(n):
+        for i in range(m):
+            if graph_map[j][i] == 2:
+                dq.append((j, i))
 
     while dq:
         ey, ex = dq.popleft()
         for k in range(4):
             ny = ey + dy[k]
             nx = ex + dx[k]
-            if (0<=nx<m) and (0<=ny<n) and (map[ny][nx] == "0"):
-                map[ny][nx] = "2"
+            if (0<=nx<m) and (0<=ny<n) and (graph_map[ny][nx] == 0):
+                graph_map[ny][nx] = 2
                 dq.append((ny, nx))
 
-def cal_area(map):
-    for j in range(n):
-        for i in range(m):
-            if map[j][i] == "2":
-                bfs(j, i, map)
-    area = 0
-    for row in map:
-        area += row.count("0")
-    return area
+    safe_area = sum(row.count(0) for row in graph_map)
+    return safe_area
 
-index = 0
-zero_index_list = []
-
-while True:
-    try:
-        next_i = map_string.index("0", index+1)
-        zero_index_list.append(next_i)
-        index = next_i
-    except:
-        break
-
+empty_spaces = [(y, x) for y in range(n) for x in range(m) if graph_map[y][x] == 0]
 max_area = 0
-for i in range(len(zero_index_list) - 2):
-    for j in range(i+1, len(zero_index_list) - 1):
-        for k in range(j+1, len(zero_index_list)):
-            new_map_list = list(map_string)
-            new_map_list[zero_index_list[i]] = "1"
-            new_map_list[zero_index_list[j]] = "1"
-            new_map_list[zero_index_list[k]] = "1"
-            new_map_string = " ".join(new_map_list)
-            temp_list = new_map_string.split("/")
-            new_map = [row.split() for row in temp_list]
-            max_area = max(max_area, cal_area(new_map))
+
+for walls in combinations(empty_spaces, 3):
+    new_map = [row[:] for row in graph_map]
+    for y, x in walls:
+        new_map[y][x] = 1
+
+    safe_area = bfs(new_map)
+    max_area = max(max_area, safe_area)
+
 print(max_area)
