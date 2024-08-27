@@ -10,7 +10,6 @@ from collections import deque
 from itertools import combinations
 f = sys.stdin
 
-
 n, m = map(int, f.readline().split())
 graph_map = [ list(map(int, f.readline().split())) for _ in range(n) ]
 
